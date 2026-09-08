@@ -60,18 +60,21 @@ function App() {
       </header>
 
       <motion.div
-        className="absolute top-6 right-0 bottom-24 z-10 w-80 cursor-pointer border-l border-blue-400 bg-blue-500/50 shadow-[-5px_0_15px_rgba(0,100,255,0.4)] transition-colors hover:bg-blue-400"
-        variants={{
-          open: { x: 0 },
-          closed: { x: 'calc(100% - 16px)' },
-        }}
-        animate={isSidePanelOpen ? 'open' : 'closed'}
+        className="fixed right-0 top-1/2 z-30 flex h-[70vh] w-80 -translate-y-1/2 rounded-l-2xl border-y border-l border-white/20 bg-slate-900/80 backdrop-blur-md"
+        initial={false}
+        animate={{ x: isSidePanelOpen ? 0 : 'calc(100% - 32px)' }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        onClick={() => setIsSidePanelOpen((open) => !open)}
       >
+        <button
+          type="button"
+          aria-label={isSidePanelOpen ? 'Close climate data panel' : 'Open climate data panel'}
+          className="flex h-full w-[32px] shrink-0 items-center justify-center border-r border-white/10 transition-colors hover:bg-white/5"
+          onClick={() => setIsSidePanelOpen((open) => !open)}
+        >
+          <div className="h-12 w-1.5 rounded-full bg-white/30" />
+        </button>
         <aside
-          className="flex h-full w-full flex-col rounded-l-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md"
-          onClick={(event) => event.stopPropagation()}
+          className="flex h-full flex-1 flex-col p-4"
         >
           <p className="text-sm font-medium text-slate-200">
             Region Climate Data
@@ -80,19 +83,18 @@ function App() {
       </motion.div>
 
       <motion.div
-        className="absolute bottom-0 left-1/2 z-10 h-16 w-2/3 -translate-x-1/2 cursor-pointer border-t border-blue-400 bg-blue-500/50 shadow-[0_-5px_15px_rgba(0,100,255,0.4)] transition-colors hover:bg-blue-400"
-        variants={{
-          open: { y: 0 },
-          closed: { y: 'calc(100% - 16px)' },
-        }}
-        animate={isTimelineOpen ? 'open' : 'closed'}
+        className="fixed bottom-0 left-1/2 z-30 flex h-32 w-2/3 max-w-3xl -translate-x-1/2 flex-col rounded-t-2xl border-x border-t border-white/20 bg-slate-900/80 backdrop-blur-md"
+        initial={false}
+        animate={{ y: isTimelineOpen ? 0 : 'calc(100% - 32px)' }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        onClick={() => setIsTimelineOpen((open) => !open)}
       >
         <div
-          className="flex h-full w-full items-center justify-center rounded-t-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md"
-          onClick={(event) => event.stopPropagation()}
+          className="flex h-[32px] w-full shrink-0 cursor-pointer items-center justify-center transition-colors hover:bg-white/5"
+          onClick={() => setIsTimelineOpen((open) => !open)}
         >
+          <div className="h-1.5 w-12 rounded-full bg-white/30" />
+        </div>
+        <div className="flex flex-1 items-center justify-center p-4">
           <p className="text-sm font-medium text-slate-200">Timeline Slider</p>
         </div>
       </motion.div>

@@ -93,7 +93,6 @@ function GlobeView() {
     height: typeof window === 'undefined' ? 0 : window.innerHeight,
   })
   const [showPlanetMenu, setShowPlanetMenu] = useState(false)
-  const [lightMode, setLightMode] = useState<'realistic' | 'full'>('realistic')
   const [countries, setCountries] = useState<CountryCollection>({
     features: [],
   })
@@ -131,36 +130,9 @@ function GlobeView() {
     }
     if (controls) {
       controls.autoRotate = true
-      controls.autoRotateSpeed = 8.0
+      controls.autoRotateSpeed = 0.25
     }
-    const timeout = setTimeout(() => {
-      if (controls) {
-        controls.autoRotateSpeed = 0.5
-      }
-    }, 2000)
-    return () => clearTimeout(timeout)
   }, [])
-
-  useEffect(() => {
-    const scene = globeRef.current?.scene()
-    if (!scene) {
-      return
-    }
-
-    const ambientLight = scene.children.find(
-      (child: SceneChild) => child.type === 'AmbientLight',
-    ) as { intensity: number } | undefined
-    const directionalLight = scene.children.find(
-      (child: SceneChild) => child.type === 'DirectionalLight',
-    ) as { intensity: number } | undefined
-
-    if (ambientLight) {
-      ambientLight.intensity = lightMode === 'full' ? 3.0 : 0.1
-    }
-    if (directionalLight) {
-      directionalLight.intensity = lightMode === 'full' ? 0 : 1.5
-    }
-  }, [lightMode, currentPlanet])
 
   useEffect(() => {
     const scene = globeRef.current?.scene()
@@ -220,12 +192,8 @@ function GlobeView() {
             ? planetData.realTexture
             : planetData.texture
         })()}
-        backgroundImageUrl={
-          lightMode === 'realistic'
-            ? '//unpkg.com/three-globe/example/img/night-sky.png'
-            : undefined
-        }
         backgroundColor="rgba(0,0,0,0)"
+        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
         onZoom={(pov) => setShowPlanetMenu(pov.altitude > 5.0)}
         polygonsData={currentPlanet === 'Earth' ? countries.features : []}
         polygonAltitude={0.01}
@@ -246,16 +214,6 @@ function GlobeView() {
           )
         }}
       />
-
-      <button
-        type="button"
-        onClick={() =>
-          setLightMode((mode) => (mode === 'realistic' ? 'full' : 'realistic'))
-        }
-        className="absolute top-6 right-6 z-20 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 shadow-lg backdrop-blur-md transition hover:bg-white/10"
-      >
-        {lightMode === 'realistic' ? 'Full light' : 'Realistic light'}
-      </button>
 
       <AnimatePresence>
         {showPlanetMenu && (
