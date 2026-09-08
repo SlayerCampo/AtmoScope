@@ -85,7 +85,10 @@ function App() {
       <motion.div
         className="fixed bottom-0 left-1/2 z-50 flex h-32 w-[calc(100%-22rem)] max-w-4xl -translate-x-1/2 flex-col rounded-t-2xl border-x border-t border-white/20 bg-slate-900/80 backdrop-blur-md"
         initial={false}
-        animate={{ y: isTimelineOpen ? 0 : 'calc(100% - 32px)' }}
+        animate={{
+          x: '-50%',
+          y: isTimelineOpen ? 0 : 'calc(100% - 32px)',
+        }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         <div

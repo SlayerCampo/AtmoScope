@@ -79,9 +79,14 @@ type CountryCollection = {
   features: CountryFeature[]
 }
 
+const transparentPolygonCap = () => 'rgba(255, 255, 255, 0.0)'
+const polygonSide = () => 'rgba(0, 100, 0, 0.15)'
+const polygonStroke = () => '#111'
+
 function GlobeView() {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const pointerDownCoords = useRef({ x: 0, y: 0 })
+  const isMenuVisibleRef = useRef(false)
   const currentPlanet = useAppStore((state) => state.currentPlanet)
   const setCurrentPlanet = useAppStore((state) => state.setCurrentPlanet)
   const setViewMode = useAppStore((state) => state.setViewMode)
@@ -194,12 +199,18 @@ function GlobeView() {
         })()}
         backgroundColor="rgba(0,0,0,0)"
         backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
-        onZoom={(pov) => setShowPlanetMenu(pov.altitude > 5.0)}
+        onZoom={(pov) => {
+          const isFar = pov.altitude > 5.0
+          if (isFar !== isMenuVisibleRef.current) {
+            isMenuVisibleRef.current = isFar
+            setShowPlanetMenu(isFar)
+          }
+        }}
         polygonsData={currentPlanet === 'Earth' ? countries.features : []}
         polygonAltitude={0.01}
-        polygonCapColor={() => 'rgba(255, 255, 255, 0.0)'}
-        polygonSideColor={() => 'rgba(0, 100, 0, 0.15)'}
-        polygonStrokeColor={() => '#111'}
+        polygonCapColor={transparentPolygonCap}
+        polygonSideColor={polygonSide}
+        polygonStrokeColor={polygonStroke}
         onPolygonClick={(polygon, event) => {
           const distance = Math.hypot(
             event.clientX - pointerDownCoords.current.x,
