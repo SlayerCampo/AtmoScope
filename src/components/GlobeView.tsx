@@ -70,16 +70,45 @@ type SceneChild = {
   scale?: { set: (x: number, y: number, z: number) => void }
 }
 
+type CountryFeature = {
+  properties?: Record<string, unknown>
+  [key: string]: unknown
+}
+
+type CountryCollection = {
+  features: CountryFeature[]
+}
+
 function GlobeView() {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const currentPlanet = useAppStore((state) => state.currentPlanet)
   const setCurrentPlanet = useAppStore((state) => state.setCurrentPlanet)
+  const setViewMode = useAppStore((state) => state.setViewMode)
+  const setSelectedRegionData = useAppStore(
+    (state) => state.setSelectedRegionData,
+  )
   const [viewport, setViewport] = useState({
     width: typeof window === 'undefined' ? 0 : window.innerWidth,
     height: typeof window === 'undefined' ? 0 : window.innerHeight,
   })
   const [showPlanetMenu, setShowPlanetMenu] = useState(false)
   const [lightMode, setLightMode] = useState<'realistic' | 'full'>('realistic')
+  const [countries, setCountries] = useState<CountryCollection>({
+    features: [],
+  })
+
+  useEffect(() => {
+    fetch(
+      'https://raw.githubusercontent.com/vasturiano/react-globe.gl/master/example/datasets/ne_110m_admin_0_countries.geojson',
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to load country data: ${response.status}`)
+        }
+        return response.json() as Promise<CountryCollection>
+      })
+      .then(setCountries)
+  }, [])
 
   useEffect(() => {
     const handleResize = () => {
@@ -179,6 +208,18 @@ function GlobeView() {
         }
         backgroundColor="rgba(0,0,0,0)"
         onZoom={(pov) => setShowPlanetMenu(pov.altitude > 5.0)}
+        polygonsData={currentPlanet === 'Earth' ? countries.features : []}
+        polygonAltitude={0.01}
+        polygonCapColor={() => 'rgba(255, 255, 255, 0.0)'}
+        polygonSideColor={() => 'rgba(0, 100, 0, 0.15)'}
+        polygonStrokeColor={() => '#111'}
+        onPolygonHover={() => undefined}
+        onPolygonClick={(polygon) => {
+          setViewMode('2D')
+          setSelectedRegionData(
+            (polygon as CountryFeature).properties ?? null,
+          )
+        }}
       />
 
       <button

@@ -1,11 +1,27 @@
 import { Globe } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
 import GlobeView from './components/GlobeView'
+import FlatMapView from './components/FlatMapView'
+import { useAppStore } from './store/useAppStore'
 
 function App() {
+  const viewMode = useAppStore((state) => state.viewMode)
+
   return (
     <main className="relative flex h-screen w-screen overflow-hidden bg-slate-950 text-white">
       <div className="absolute inset-0 z-0">
-        <GlobeView />
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={viewMode}
+            className="h-full w-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+          >
+            {viewMode === '3D' ? <GlobeView /> : <FlatMapView />}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       <header className="absolute top-6 left-6 z-10 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
