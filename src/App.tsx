@@ -1,10 +1,11 @@
 import { Globe } from 'lucide-react'
+import GlobeView from './components/GlobeView'
 
 function App() {
   return (
     <main className="relative flex h-screen w-screen overflow-hidden bg-slate-950 text-white">
-      <div className="absolute inset-0 z-0 flex items-center justify-center text-slate-400">
-        3D Globe Canvas Placeholder
+      <div className="absolute inset-0 z-0">
+        <GlobeView />
       </div>
 
       <header className="absolute top-6 left-6 z-10 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
