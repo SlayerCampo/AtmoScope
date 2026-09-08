@@ -5,49 +5,70 @@ import { useAppStore } from '../store/useAppStore'
 
 const PLANETS_DATA = {
   Sun: {
-    texture: 'https://upload.wikimedia.org/wikipedia/commons/9/99/Map_of_the_full_sun.jpg',
-    info: 'Center of the solar system. Surface Temp: 5,500°C',
+    texture:
+      'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_4096.jpg',
+    realTexture:
+      'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/sun.jpg',
+    scale: 5,
+    hasRings: false,
+    info: 'Center of the solar system.',
   },
   Mercury: {
-    texture:
-      'https://upload.wikimedia.org/wikipedia/commons/3/30/Mercury_in_color_-_Prockter07_centered.jpg',
+    texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/mercury.jpg',
+    scale: 1,
+    hasRings: false,
     info: 'No atmosphere. Temp: -173°C to 427°C',
   },
   Venus: {
-    texture:
-      'https://upload.wikimedia.org/wikipedia/commons/1/19/Venus_equirectangular_map.jpg',
+    texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/venus.jpg',
+    scale: 1,
+    hasRings: false,
     info: 'Toxic greenhouse effect. Temp: 464°C',
   },
   Earth: {
-    texture: '//unpkg.com/three-globe/example/img/earth-dark.jpg',
+    texture: '//unpkg.com/three-globe/example/img/earth-blue-marble.jpg',
+    scale: 1,
+    hasRings: false,
     info: 'Habitable zone. Average Temp: 15°C',
   },
   Mars: {
-    texture:
-      'https://upload.wikimedia.org/wikipedia/commons/7/7d/Mars_equirectangular_projection.jpg',
+    texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/mars.jpg',
+    scale: 1,
+    hasRings: false,
     info: 'Cold desert. Average Temp: -65°C',
   },
   Jupiter: {
-    texture:
-      'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg',
+    texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/jupiter.jpg',
+    scale: 2,
+    hasRings: false,
     info: 'Gas giant. Cloud top Temp: -108°C',
   },
   Saturn: {
-    texture:
-      'https://upload.wikimedia.org/wikipedia/commons/b/b4/Saturn_%28planet%29_large.jpg',
+    texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/saturn.jpg',
+    scale: 1.8,
+    hasRings: true,
     info: 'Ringed gas giant. Temp: -139°C',
   },
   Uranus: {
-    texture:
-      'https://upload.wikimedia.org/wikipedia/commons/9/95/Uranus_monochrome_map.jpg',
+    texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/uranus.jpg',
+    scale: 1.5,
+    hasRings: false,
     info: 'Ice giant. Temp: -195°C',
   },
   Neptune: {
-    texture:
-      'https://upload.wikimedia.org/wikipedia/commons/1/1e/Neptune_monochrome_map.jpg',
+    texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/neptune.jpg',
+    scale: 1.5,
+    hasRings: false,
     info: 'Ice giant. High winds. Temp: -200°C',
   },
 } as const
+
+type SceneChild = {
+  type: string
+  name: string
+  intensity?: number
+  scale?: { set: (x: number, y: number, z: number) => void }
+}
 
 function GlobeView() {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
@@ -58,6 +79,7 @@ function GlobeView() {
     height: typeof window === 'undefined' ? 0 : window.innerHeight,
   })
   const [showPlanetMenu, setShowPlanetMenu] = useState(false)
+  const [lightMode, setLightMode] = useState<'realistic' | 'full'>('realistic')
 
   useEffect(() => {
     const handleResize = () => {
@@ -79,17 +101,62 @@ function GlobeView() {
     }
   }, [])
 
-  const handlePlanetTravel = (planetName: keyof typeof PLANETS_DATA) => {
+  useEffect(() => {
+    const scene = globeRef.current?.scene()
+    if (!scene) {
+      return
+    }
+
+    const ambientLight = scene.children.find(
+      (child: SceneChild) => child.type === 'AmbientLight',
+    ) as { intensity: number } | undefined
+    const directionalLight = scene.children.find(
+      (child: SceneChild) => child.type === 'DirectionalLight',
+    ) as { intensity: number } | undefined
+
+    if (ambientLight) {
+      ambientLight.intensity = lightMode === 'full' ? 3.0 : 0.1
+    }
+    if (directionalLight) {
+      directionalLight.intensity = lightMode === 'full' ? 0 : 1.5
+    }
+  }, [lightMode, currentPlanet])
+
+  useEffect(() => {
+    const scene = globeRef.current?.scene()
+    const globeMesh = scene
+      ? (scene.children as SceneChild[]).find(
+          (child) => child.type === 'Mesh' || child.name === 'globe',
+        )
+      : undefined
+    const scale = PLANETS_DATA[currentPlanet as keyof typeof PLANETS_DATA].scale
+    globeMesh?.scale?.set(scale, scale, scale)
+  }, [currentPlanet])
+
+  const handlePlanetTravel = async (
+    planetName: keyof typeof PLANETS_DATA,
+  ) => {
     const globe = globeRef.current
     if (!globe || planetName === currentPlanet) {
       return
     }
 
-    globe.pointOfView({ altitude: 15 }, 400)
-    setTimeout(() => {
-      setCurrentPlanet(planetName)
-      globe.pointOfView({ altitude: 2.5 }, 800)
-    }, 400)
+    const currentPov = globe.pointOfView()
+    globe.pointOfView({ altitude: 8 }, 500)
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    globe.pointOfView(
+      {
+        lat: currentPov.lat + 30,
+        lng: currentPov.lng + 90,
+        altitude: 12,
+      },
+      400,
+    )
+    await new Promise((resolve) => setTimeout(resolve, 400))
+    setCurrentPlanet(planetName)
+    const targetAltitude =
+      PLANETS_DATA[planetName].scale === 5 ? 8 : 2.5
+    globe.pointOfView({ lat: 0, lng: 0, altitude: targetAltitude }, 1000)
   }
 
   return (
@@ -98,11 +165,31 @@ function GlobeView() {
         ref={globeRef}
         width={viewport.width}
         height={viewport.height}
-        globeImageUrl={PLANETS_DATA[currentPlanet as keyof typeof PLANETS_DATA]?.texture}
-        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+        globeImageUrl={(() => {
+          const planetData =
+            PLANETS_DATA[currentPlanet as keyof typeof PLANETS_DATA]
+          return 'realTexture' in planetData
+            ? planetData.realTexture
+            : planetData.texture
+        })()}
+        backgroundImageUrl={
+          lightMode === 'realistic'
+            ? '//unpkg.com/three-globe/example/img/night-sky.png'
+            : undefined
+        }
         backgroundColor="rgba(0,0,0,0)"
         onZoom={(pov) => setShowPlanetMenu(pov.altitude > 5.0)}
       />
+
+      <button
+        type="button"
+        onClick={() =>
+          setLightMode((mode) => (mode === 'realistic' ? 'full' : 'realistic'))
+        }
+        className="absolute top-6 right-6 z-20 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 shadow-lg backdrop-blur-md transition hover:bg-white/10"
+      >
+        {lightMode === 'realistic' ? 'Full light' : 'Realistic light'}
+      </button>
 
       <AnimatePresence>
         {showPlanetMenu && (
