@@ -89,10 +89,10 @@ function App() {
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         <div
-          className="flex h-[32px] w-full shrink-0 cursor-pointer items-center justify-center transition-colors hover:bg-white/5"
+          className="flex h-8 w-full shrink-0 cursor-pointer items-center justify-center transition-colors hover:bg-white/5"
           onClick={() => setIsTimelineOpen((open) => !open)}
         >
-          <div className="h-1.5 w-12 rounded-full bg-white/30" />
+          <div className="mx-auto h-1.5 w-12 rounded-full bg-white/30" />
         </div>
         <div className="flex flex-1 items-center justify-center p-4">
           <p className="text-sm font-medium text-slate-200">Timeline Slider</p>
