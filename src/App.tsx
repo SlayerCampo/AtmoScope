@@ -7,8 +7,9 @@ import { useAppStore } from './store/useAppStore'
 
 function App() {
   const viewMode = useAppStore((state) => state.viewMode)
+  const isSidePanelOpen = useAppStore((state) => state.isSidePanelOpen)
+  const setSidePanelOpen = useAppStore((state) => state.setSidePanelOpen)
   const [isLoaded, setIsLoaded] = useState(false)
-  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false)
   const [isTimelineOpen, setIsTimelineOpen] = useState(false)
 
   useEffect(() => {
@@ -69,7 +70,7 @@ function App() {
           type="button"
           aria-label={isSidePanelOpen ? 'Close climate data panel' : 'Open climate data panel'}
           className="flex h-full w-[32px] shrink-0 items-center justify-center border-r border-white/10 transition-colors hover:bg-white/5"
-          onClick={() => setIsSidePanelOpen((open) => !open)}
+          onClick={() => setSidePanelOpen(!isSidePanelOpen)}
         >
           <div className="h-12 w-1.5 rounded-full bg-white/30" />
         </button>
