@@ -60,7 +60,7 @@ function App() {
       </header>
 
       <motion.div
-        className="fixed right-0 top-1/2 z-30 flex h-[70vh] w-80 -translate-y-1/2 rounded-l-2xl border-y border-l border-white/20 bg-slate-900/80 backdrop-blur-md"
+        className="fixed top-6 right-0 bottom-36 z-40 flex w-80 rounded-l-2xl border-y border-l border-white/20 bg-slate-900/80 backdrop-blur-md"
         initial={false}
         animate={{ x: isSidePanelOpen ? 0 : 'calc(100% - 32px)' }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -83,7 +83,7 @@ function App() {
       </motion.div>
 
       <motion.div
-        className="fixed bottom-0 left-1/2 z-30 flex h-32 w-2/3 max-w-3xl -translate-x-1/2 flex-col rounded-t-2xl border-x border-t border-white/20 bg-slate-900/80 backdrop-blur-md"
+        className="fixed bottom-0 left-1/2 z-50 flex h-32 w-[calc(100%-22rem)] max-w-4xl -translate-x-1/2 flex-col rounded-t-2xl border-x border-t border-white/20 bg-slate-900/80 backdrop-blur-md"
         initial={false}
         animate={{ y: isTimelineOpen ? 0 : 'calc(100% - 32px)' }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
