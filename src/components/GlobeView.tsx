@@ -93,6 +93,7 @@ function GlobeView() {
   const setSelectedRegionData = useAppStore(
     (state) => state.setSelectedRegionData,
   )
+  const setSelectionLevel = useAppStore((state) => state.setSelectionLevel)
   const [viewport, setViewport] = useState({
     width: typeof window === 'undefined' ? 0 : window.innerWidth,
     height: typeof window === 'undefined' ? 0 : window.innerHeight,
@@ -220,6 +221,7 @@ function GlobeView() {
             return
           }
           setViewMode('2D')
+          setSelectionLevel('COUNTRY')
           setSelectedRegionData(
             (polygon as CountryFeature).properties ?? null,
           )

@@ -1,11 +1,32 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
-import { GeoJSON, MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
+import { latLngBounds, type LatLngBounds, type Layer, type PathOptions } from 'leaflet'
+import { useEffect, useRef, useState } from 'react'
+import {
+  GeoJSON,
+  MapContainer,
+  TileLayer,
+  useMap,
+  useMapEvents,
+} from 'react-leaflet'
 import type { GeoJsonObject } from 'geojson'
 import { useAppStore } from '../store/useAppStore'
 
 const GEO_URL =
   'https://raw.githubusercontent.com/vasturiano/react-globe.gl/master/example/datasets/ne_110m_admin_0_countries.geojson'
+
+type RegionProperties = {
+  ADMIN?: string
+  CONTINENT?: string
+  [key: string]: unknown
+}
+
+type FeatureLayer = Layer & {
+  feature?: {
+    properties?: RegionProperties
+  }
+  getBounds?: () => LatLngBounds
+  eachLayer?: (callback: (layer: Layer) => void) => void
+}
 
 type MapControllerProps = {
   onZoomOut: (isZoomedOut: boolean) => void
@@ -21,14 +42,75 @@ function MapController({ onZoomOut }: MapControllerProps) {
   return null
 }
 
+function MapEffects({
+  geoData,
+  selectedRegionData,
+  selectionLevel,
+}: {
+  geoData: GeoJsonObject | null
+  selectedRegionData: RegionProperties | null
+  selectionLevel: 'GLOBAL' | 'CONTINENT' | 'COUNTRY'
+}) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!geoData || !selectedRegionData) {
+      return
+    }
+
+    const targetAdmin = selectedRegionData.ADMIN
+    const targetContinent = selectedRegionData.CONTINENT
+    const bounds = latLngBounds([])
+
+    map.eachLayer((layer) => {
+      const group = layer as FeatureLayer
+      if (!group.eachLayer) {
+        return
+      }
+
+      group.eachLayer((featureLayer) => {
+        const countryLayer = featureLayer as FeatureLayer
+        const properties = countryLayer.feature?.properties
+        const isMatch =
+          selectionLevel === 'COUNTRY'
+            ? properties?.ADMIN === targetAdmin
+            : properties?.CONTINENT === targetContinent
+
+        if (isMatch && countryLayer.getBounds) {
+          bounds.extend(countryLayer.getBounds())
+        }
+      })
+    })
+
+    if (bounds.isValid()) {
+      map.flyToBounds(bounds, {
+        duration: 1.5,
+        padding: [50, 50],
+      })
+    }
+  }, [geoData, map, selectedRegionData, selectionLevel])
+
+  return null
+}
+
 function FlatMapView() {
   const setViewMode = useAppStore((state) => state.setViewMode)
+  const selectedRegionData = useAppStore(
+    (state) => state.selectedRegionData as RegionProperties | null,
+  )
+  const selectionLevel = useAppStore((state) => state.selectionLevel)
   const setSelectedRegionData = useAppStore(
     (state) => state.setSelectedRegionData,
   )
+  const setSelectionLevel = useAppStore((state) => state.setSelectionLevel)
   const setSidePanelOpen = useAppStore((state) => state.setSidePanelOpen)
+  const selectionLevelRef = useRef(selectionLevel)
   const [geoData, setGeoData] = useState<GeoJsonObject | null>(null)
   const [showExitButton, setShowExitButton] = useState(false)
+
+  useEffect(() => {
+    selectionLevelRef.current = selectionLevel
+  }, [selectionLevel])
 
   useEffect(() => {
     fetch(GEO_URL)
@@ -63,20 +145,55 @@ function FlatMapView() {
         {geoData && (
           <GeoJSON
             data={geoData}
-            style={() => ({
-              color: 'rgba(255,255,255,0.1)',
-              weight: 1,
-              fillColor: 'transparent',
-            })}
+            style={(feature) => {
+              const properties = feature?.properties as RegionProperties | undefined
+              const isSelectedCountry =
+                properties?.ADMIN === selectedRegionData?.ADMIN
+              const isSelectedContinent =
+                properties?.CONTINENT === selectedRegionData?.CONTINENT &&
+                selectionLevel === 'CONTINENT'
+
+              if (isSelectedCountry || isSelectedContinent) {
+                return {
+                  color: '#00ffff',
+                  weight: 2,
+                  fillColor: '#00aaff',
+                  fillOpacity: 0.35,
+                  shadowBlur: 10,
+                  shadowColor: '#00ffff',
+                } as PathOptions
+              }
+
+              return {
+                color: 'rgba(255,255,255,0.1)',
+                weight: 1,
+                fillColor: 'transparent',
+              }
+            }}
             onEachFeature={(feature, layer) => {
               layer.on('click', () => {
+                const nextLevel =
+                  selectionLevelRef.current === 'CONTINENT'
+                    ? 'COUNTRY'
+                    : 'CONTINENT'
                 setSelectedRegionData(feature.properties ?? null)
+                setSelectionLevel(nextLevel)
+                setSidePanelOpen(true)
+              })
+              layer.on('dblclick', () => {
+                setSelectedRegionData(feature.properties ?? null)
+                setSelectionLevel('COUNTRY')
                 setSidePanelOpen(true)
               })
             }}
           />
         )}
         <MapController onZoomOut={setShowExitButton} />
+        <MapEffects
+          geoData={geoData}
+          selectedRegionData={selectedRegionData}
+          selectionLevel={selectionLevel}
+        />
       </MapContainer>
 
       <button

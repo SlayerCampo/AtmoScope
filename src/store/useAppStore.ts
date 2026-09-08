@@ -7,6 +7,7 @@ interface AppState {
   currentPlanet: string
   viewMode: '3D' | '2D'
   selectedRegionData: any
+  selectionLevel: 'GLOBAL' | 'CONTINENT' | 'COUNTRY'
   isSidePanelOpen: boolean
   setSelectedYear: (year: number) => void
   setActiveRegion: (region: string | null) => void
@@ -14,6 +15,7 @@ interface AppState {
   setCurrentPlanet: (planet: string) => void
   setViewMode: (mode: '3D' | '2D') => void
   setSelectedRegionData: (data: any) => void
+  setSelectionLevel: (level: 'GLOBAL' | 'CONTINENT' | 'COUNTRY') => void
   setSidePanelOpen: (isOpen: boolean) => void
 }
 
@@ -24,6 +26,7 @@ export const useAppStore = create<AppState>((set) => ({
   currentPlanet: 'Earth',
   viewMode: '3D',
   selectedRegionData: null,
+  selectionLevel: 'GLOBAL',
   isSidePanelOpen: false,
   setSelectedYear: (year) => set({ selectedYear: year }),
   setActiveRegion: (region) => set({ activeRegion: region }),
@@ -31,5 +34,6 @@ export const useAppStore = create<AppState>((set) => ({
   setCurrentPlanet: (planet) => set({ currentPlanet: planet }),
   setViewMode: (mode) => set({ viewMode: mode }),
   setSelectedRegionData: (data) => set({ selectedRegionData: data }),
+  setSelectionLevel: (level) => set({ selectionLevel: level }),
   setSidePanelOpen: (isOpen) => set({ isSidePanelOpen: isOpen }),
 }))
