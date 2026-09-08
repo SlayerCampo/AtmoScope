@@ -8,6 +8,8 @@ import { useAppStore } from './store/useAppStore'
 function App() {
   const viewMode = useAppStore((state) => state.viewMode)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false)
+  const [isTimelineOpen, setIsTimelineOpen] = useState(false)
 
   useEffect(() => {
     const timeout = setTimeout(() => setIsLoaded(true), 2000)
@@ -57,13 +59,43 @@ function App() {
         <h1 className="text-lg font-semibold tracking-wide">AtmoScope</h1>
       </header>
 
-      <aside className="absolute top-6 right-6 bottom-24 z-10 flex w-80 flex-col rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
-        <p className="text-sm font-medium text-slate-200">Region Climate Data</p>
-      </aside>
+      <motion.div
+        className="absolute top-6 right-0 bottom-24 z-10 w-80 cursor-pointer border-l border-blue-400 bg-blue-500/50 shadow-[-5px_0_15px_rgba(0,100,255,0.4)] transition-colors hover:bg-blue-400"
+        variants={{
+          open: { x: 0 },
+          closed: { x: 'calc(100% - 16px)' },
+        }}
+        animate={isSidePanelOpen ? 'open' : 'closed'}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        onClick={() => setIsSidePanelOpen((open) => !open)}
+      >
+        <aside
+          className="flex h-full w-full flex-col rounded-l-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <p className="text-sm font-medium text-slate-200">
+            Region Climate Data
+          </p>
+        </aside>
+      </motion.div>
 
-      <div className="absolute bottom-6 left-1/2 z-10 flex h-16 w-2/3 -translate-x-1/2 items-center justify-center rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
-        <p className="text-sm font-medium text-slate-200">Timeline Slider</p>
-      </div>
+      <motion.div
+        className="absolute bottom-0 left-1/2 z-10 h-16 w-2/3 -translate-x-1/2 cursor-pointer border-t border-blue-400 bg-blue-500/50 shadow-[0_-5px_15px_rgba(0,100,255,0.4)] transition-colors hover:bg-blue-400"
+        variants={{
+          open: { y: 0 },
+          closed: { y: 'calc(100% - 16px)' },
+        }}
+        animate={isTimelineOpen ? 'open' : 'closed'}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        onClick={() => setIsTimelineOpen((open) => !open)}
+      >
+        <div
+          className="flex h-full w-full items-center justify-center rounded-t-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <p className="text-sm font-medium text-slate-200">Timeline Slider</p>
+        </div>
+      </motion.div>
     </main>
   )
 }

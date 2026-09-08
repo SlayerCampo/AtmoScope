@@ -125,6 +125,10 @@ function GlobeView() {
 
   useEffect(() => {
     const controls = globeRef.current?.controls()
+    const renderer = globeRef.current?.renderer()
+    if (renderer) {
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
+    }
     if (controls) {
       controls.autoRotate = true
       controls.autoRotateSpeed = 8.0
@@ -160,6 +164,9 @@ function GlobeView() {
 
   useEffect(() => {
     const scene = globeRef.current?.scene()
+    if (scene) {
+      ;(scene as SceneChild & { environment?: unknown }).environment = null
+    }
     const globeMesh = scene
       ? (scene.children as SceneChild[]).find(
           (child) => child.type === 'Mesh' || child.name === 'globe',
@@ -225,7 +232,6 @@ function GlobeView() {
         polygonCapColor={() => 'rgba(255, 255, 255, 0.0)'}
         polygonSideColor={() => 'rgba(0, 100, 0, 0.15)'}
         polygonStrokeColor={() => '#111'}
-        onPolygonHover={() => undefined}
         onPolygonClick={(polygon, event) => {
           const distance = Math.hypot(
             event.clientX - pointerDownCoords.current.x,
