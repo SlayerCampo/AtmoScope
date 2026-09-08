@@ -135,13 +135,16 @@ function FlatMapView() {
         maxZoom={12}
         zoomControl={false}
         attributionControl={false}
-        className="relative z-10 h-screen w-full"
+        className="relative z-10 h-screen w-full bg-slate-950"
         maxBounds={[
           [-90, -180],
           [90, 180],
         ]}
       >
-        <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
+        <TileLayer
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          keepBuffer={4}
+        />
         {geoData && (
           <GeoJSON
             data={geoData}
@@ -157,8 +160,8 @@ function FlatMapView() {
                 return {
                   color: '#00ffff',
                   weight: 2,
-                  fillColor: '#00aaff',
-                  fillOpacity: 0.35,
+                  fillColor: 'transparent',
+                  fillOpacity: 0,
                   shadowBlur: 10,
                   shadowColor: '#00ffff',
                 } as PathOptions

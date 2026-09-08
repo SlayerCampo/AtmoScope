@@ -12,3 +12,7 @@ body,
   touch-action: none;
   overscroll-behavior: none;
 }
+
+.leaflet-container {
+  background: #020617 !important;
+}
