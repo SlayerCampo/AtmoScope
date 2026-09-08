@@ -1,4 +1,5 @@
 import { ComposableMap, Geography, Geographies, ZoomableGroup } from 'react-simple-maps'
+import { useState } from 'react'
 import { useAppStore } from '../store/useAppStore'
 
 const GEO_URL =
@@ -6,6 +7,7 @@ const GEO_URL =
 
 function FlatMapView() {
   const setViewMode = useAppStore((state) => state.setViewMode)
+  const [zoomHintOpacity, setZoomHintOpacity] = useState(0)
 
   return (
     <div className="relative h-full w-full bg-slate-950">
@@ -22,7 +24,20 @@ function FlatMapView() {
         className="h-full w-full"
         projectionConfig={{ scale: 150 }}
       >
-        <ZoomableGroup>
+        <ZoomableGroup
+          minZoom={0.5}
+          maxZoom={10}
+          translateExtent={[
+            [0, -200],
+            [800, 600],
+          ]}
+          onMove={(position) => {
+            setZoomHintOpacity(position.zoom < 0.8 ? 1 : 0)
+            if (position.zoom < 0.55) {
+              setViewMode('3D')
+            }
+          }}
+        >
           <Geographies geography={GEO_URL}>
             {({ geographies }) =>
               geographies.map((geography) => (
@@ -43,6 +58,12 @@ function FlatMapView() {
           </Geographies>
         </ZoomableGroup>
       </ComposableMap>
+      <div
+        className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2 text-sm text-slate-200 backdrop-blur-md transition-opacity"
+        style={{ opacity: zoomHintOpacity }}
+      >
+        Keep scrolling out to return to orbit...
+      </div>
     </div>
   )
 }

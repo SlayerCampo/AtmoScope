@@ -81,6 +81,7 @@ type CountryCollection = {
 
 function GlobeView() {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
+  const pointerDownCoords = useRef({ x: 0, y: 0 })
   const currentPlanet = useAppStore((state) => state.currentPlanet)
   const setCurrentPlanet = useAppStore((state) => state.setCurrentPlanet)
   const setViewMode = useAppStore((state) => state.setViewMode)
@@ -126,8 +127,14 @@ function GlobeView() {
     const controls = globeRef.current?.controls()
     if (controls) {
       controls.autoRotate = true
-      controls.autoRotateSpeed = 0.5
+      controls.autoRotateSpeed = 8.0
     }
+    const timeout = setTimeout(() => {
+      if (controls) {
+        controls.autoRotateSpeed = 0.5
+      }
+    }, 2000)
+    return () => clearTimeout(timeout)
   }, [])
 
   useEffect(() => {
@@ -189,7 +196,12 @@ function GlobeView() {
   }
 
   return (
-    <div className="relative h-full w-full">
+    <div
+      className="relative h-full w-full"
+      onPointerDown={(event) => {
+        pointerDownCoords.current = { x: event.clientX, y: event.clientY }
+      }}
+    >
       <Globe
         ref={globeRef}
         width={viewport.width}
@@ -214,7 +226,14 @@ function GlobeView() {
         polygonSideColor={() => 'rgba(0, 100, 0, 0.15)'}
         polygonStrokeColor={() => '#111'}
         onPolygonHover={() => undefined}
-        onPolygonClick={(polygon) => {
+        onPolygonClick={(polygon, event) => {
+          const distance = Math.hypot(
+            event.clientX - pointerDownCoords.current.x,
+            event.clientY - pointerDownCoords.current.y,
+          )
+          if (distance > 5) {
+            return
+          }
           setViewMode('2D')
           setSelectedRegionData(
             (polygon as CountryFeature).properties ?? null,

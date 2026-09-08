@@ -1,11 +1,28 @@
 import { Globe } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import GlobeView from './components/GlobeView'
 import FlatMapView from './components/FlatMapView'
 import { useAppStore } from './store/useAppStore'
 
 function App() {
   const viewMode = useAppStore((state) => state.viewMode)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setIsLoaded(true), 2000)
+    return () => clearTimeout(timeout)
+  }, [])
+
+  if (!isLoaded) {
+    return (
+      <main className="flex h-screen w-screen items-center justify-center bg-slate-950 text-cyan-300">
+        <p className="animate-pulse text-sm font-medium tracking-[0.3em]">
+          CALIBRATING ORBITAL SENSORS...
+        </p>
+      </main>
+    )
+  }
 
   return (
     <main className="relative flex h-screen w-screen overflow-hidden bg-slate-950 text-white">
@@ -19,7 +36,18 @@ function App() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.35 }}
           >
-            {viewMode === '3D' ? <GlobeView /> : <FlatMapView />}
+            {viewMode === '3D' ? (
+              <motion.div
+                className="h-full w-full"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', bounce: 0.6, duration: 1.2 }}
+              >
+                <GlobeView />
+              </motion.div>
+            ) : (
+              <FlatMapView />
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
