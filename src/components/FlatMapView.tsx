@@ -8,17 +8,8 @@ import {
   useMap,
   useMapEvents,
 } from 'react-leaflet'
-import type { GeoJsonObject } from 'geojson'
 import { useAppStore } from '../store/useAppStore'
-
-const GEO_URL =
-  'https://raw.githubusercontent.com/vasturiano/react-globe.gl/master/example/datasets/ne_110m_admin_0_countries.geojson'
-
-type RegionProperties = {
-  ADMIN?: string
-  CONTINENT?: string
-  [key: string]: unknown
-}
+import { fetchCountriesData, type CountryCollection, type RegionProperties } from '../services/mapData'
 
 type FeatureLayer = Layer & {
   feature?: {
@@ -47,7 +38,7 @@ function MapEffects({
   selectedRegionData,
   selectionLevel,
 }: {
-  geoData: GeoJsonObject | null
+  geoData: CountryCollection | null
   selectedRegionData: RegionProperties | null
   selectionLevel: 'GLOBAL' | 'CONTINENT' | 'COUNTRY'
 }) {
@@ -105,7 +96,7 @@ function FlatMapView() {
   const setSelectionLevel = useAppStore((state) => state.setSelectionLevel)
   const setSidePanelOpen = useAppStore((state) => state.setSidePanelOpen)
   const selectionLevelRef = useRef(selectionLevel)
-  const [geoData, setGeoData] = useState<GeoJsonObject | null>(null)
+  const [geoData, setGeoData] = useState<CountryCollection | null>(null)
   const [showExitButton, setShowExitButton] = useState(false)
 
   useEffect(() => {
@@ -113,13 +104,7 @@ function FlatMapView() {
   }, [selectionLevel])
 
   useEffect(() => {
-    fetch(GEO_URL)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to load map borders: ${response.status}`)
-        }
-        return response.json() as Promise<GeoJsonObject>
-      })
+    fetchCountriesData()
       .then(setGeoData)
       .catch((error: unknown) => {
         console.error('Unable to load map borders', error)

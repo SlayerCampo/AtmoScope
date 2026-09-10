@@ -9,6 +9,7 @@ function App() {
   const viewMode = useAppStore((state) => state.viewMode)
   const isSidePanelOpen = useAppStore((state) => state.isSidePanelOpen)
   const setSidePanelOpen = useAppStore((state) => state.setSidePanelOpen)
+  const selectedRegionData = useAppStore((state) => state.selectedRegionData)
   const [isLoaded, setIsLoaded] = useState(false)
   const [isTimelineOpen, setIsTimelineOpen] = useState(false)
 
@@ -79,11 +80,25 @@ function App() {
         <aside
           className="flex h-full flex-1 flex-col overflow-y-auto p-4"
         >
-          <p className="bg-gradient-to-r from-cyan-300 to-blue-500 bg-clip-text text-xs font-bold uppercase tracking-widest text-transparent">
-            Region Data
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="bg-gradient-to-r from-cyan-300 to-blue-500 bg-clip-text text-xs font-bold uppercase tracking-widest text-transparent">
+              Region Data
+            </p>
+          </div>
           <div className="mt-4 flex-1 text-sm text-slate-300">
-            <p className="text-slate-500 italic">No data selected...</p>
+            {selectedRegionData ? (
+              <div className="flex flex-col gap-1 rounded-xl border border-cyan-500/10 bg-slate-800/50 p-4">
+                <h2 className="text-xl font-semibold text-white">{selectedRegionData.ADMIN || 'Unknown Region'}</h2>
+                <p className="text-xs font-medium uppercase tracking-wider text-cyan-400">
+                  {selectedRegionData.CONTINENT || 'Unknown Continent'}
+                </p>
+                <div className="mt-4 border-t border-cyan-500/10 pt-4">
+                  <p className="text-xs text-slate-500 italic">Awaiting database connection...</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-slate-500 italic">No data selected...</p>
+            )}
           </div>
         </aside>
       </motion.div>
