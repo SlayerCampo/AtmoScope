@@ -235,22 +235,22 @@ function GlobeView() {
             animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
             exit={{ opacity: 0, scale: 0.8, y: -20, x: '-50%' }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="absolute top-1/4 left-1/2 z-20 w-[min(92vw,32rem)] rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-white shadow-2xl backdrop-blur-md"
+            className="absolute top-1/4 left-1/2 z-20 w-[min(90vw,28rem)] rounded-2xl border border-cyan-500/20 bg-slate-900/80 p-5 text-white shadow-[0_0_30px_rgba(34,211,238,0.1)] backdrop-blur-md"
           >
-          <p className="mb-3 text-center text-sm font-medium text-slate-200">
-            Solar System
+          <p className="mb-4 text-center bg-gradient-to-r from-cyan-300 to-blue-500 bg-clip-text text-xs font-bold uppercase tracking-widest text-transparent">
+            Orbital Navigation
           </p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-3">
             {(Object.keys(PLANETS_DATA) as Array<keyof typeof PLANETS_DATA>).map(
               (planet) => (
                 <button
                   key={planet}
                   type="button"
                   onClick={() => handlePlanetTravel(planet)}
-                  className={`rounded-xl px-4 py-2 text-sm transition ${
+                  className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all duration-300 ${
                     currentPlanet === planet
-                      ? 'bg-cyan-300 text-slate-950'
-                      : 'bg-white/10 text-slate-200 hover:bg-white/20'
+                      ? 'border-cyan-400 bg-cyan-500/20 text-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.2)]'
+                      : 'border-transparent bg-slate-800/50 text-slate-400 hover:border-cyan-500/30 hover:bg-slate-700/50 hover:text-cyan-200'
                   }`}
                 >
                   {planet}
@@ -258,7 +258,7 @@ function GlobeView() {
               ),
             )}
           </div>
-          <p className="mt-3 text-center text-xs text-slate-400">
+          <p className="mt-4 text-center text-xs text-slate-400">
             {PLANETS_DATA[currentPlanet as keyof typeof PLANETS_DATA]?.info}
           </p>
           </motion.div>
